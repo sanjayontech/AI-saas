@@ -1,0 +1,50 @@
+# Production configuration for docker-compose
+version: '3.8'
+
+services:
+  postgres:
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+  redis:
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+  server:
+    build:
+      target: production
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      GOOGLE_PROJECT_ID: ${GOOGLE_PROJECT_ID}
+    depends_on:
+      - postgres
+      - redis
+
+  client:
+    build:
+      target: production
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: ${API_URL}
+
+  # Remove mailhog in production
+  mailhog:
+    profiles:
+      - dev
+
+volumes:
+  postgres_data:
+  redis_data:

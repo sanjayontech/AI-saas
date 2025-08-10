@@ -49,6 +49,53 @@ app.use(errorHandler);
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
 
+    // Handle chat messages
+    socket.on('chatMessage', async (data) => {
+        try {
+            const { chatbotId, sessionId, message, timestamp } = data;
+            
+            console.log(`Chat message received - Chatbot: ${chatbotId}, Session: ${sessionId}, Message: ${message}`);
+            
+            // Import ChatbotService dynamically to avoid circular dependencies
+            const { ChatbotService } = await import('./services/ChatbotService');
+            const chatbotService = new ChatbotService();
+            
+            // Process the message and get AI response
+            const response = await chatbotService.processMessage({
+                chatbotId,
+                sessionId,
+                message,
+                userInfo: {}
+            });
+            
+            // Send response back to client
+            socket.emit('chatResponse', {
+                sessionId,
+                message: response.response,
+                timestamp: new Date().toISOString(),
+                messageId: response.messageId
+            });
+            
+        } catch (error) {
+            console.error('Error processing chat message:', error);
+            socket.emit('error', {
+                message: 'Failed to process message',
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+        }
+    });
+
+    // Handle joining chatbot rooms for targeted messaging
+    socket.on('joinChatbot', (chatbotId) => {
+        socket.join(`chatbot_${chatbotId}`);
+        console.log(`Socket ${socket.id} joined chatbot room: ${chatbotId}`);
+    });
+
+    socket.on('leaveChatbot', (chatbotId) => {
+        socket.leave(`chatbot_${chatbotId}`);
+        console.log(`Socket ${socket.id} left chatbot room: ${chatbotId}`);
+    });
+
     socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id);
     });

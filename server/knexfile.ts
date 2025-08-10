@@ -41,7 +41,21 @@ const config: { [key: string]: Knex.Config } = {
     },
   },
 
-  test: {
+  test: process.env.USE_SQLITE === 'true' ? {
+    client: 'sqlite3',
+    connection: {
+      filename: ':memory:',
+    },
+    useNullAsDefault: true,
+    migrations: {
+      directory: './src/database/migrations',
+      extension: 'ts',
+    },
+    seeds: {
+      directory: './src/database/seeds',
+      extension: 'ts',
+    },
+  } : {
     client: 'postgresql',
     connection: {
       host: process.env.DB_HOST || 'localhost',

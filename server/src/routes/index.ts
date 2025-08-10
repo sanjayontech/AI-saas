@@ -2,6 +2,9 @@ import { Router } from 'express';
 import authRoutes from './auth';
 import userRoutes from './users';
 import adminRoutes from './admin';
+import chatbotRoutes from './chatbots';
+import widgetRoutes from './widget';
+import analyticsRoutes from './analytics';
 
 const router = Router();
 
@@ -20,6 +23,9 @@ router.get('/health', (req, res) => {
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/admin', adminRoutes);
+router.use('/chatbots', chatbotRoutes);
+router.use('/widget', widgetRoutes);
+router.use('/analytics', analyticsRoutes);
 
 // API info endpoint
 router.get('/', (req, res) => {
@@ -32,6 +38,9 @@ router.get('/', (req, res) => {
       auth: '/api/v1/auth',
       users: '/api/v1/users',
       admin: '/api/v1/admin',
+      chatbots: '/api/v1/chatbots',
+      widget: '/api/v1/widget',
+      analytics: '/api/v1/analytics',
       health: '/api/v1/health'
     }
   });

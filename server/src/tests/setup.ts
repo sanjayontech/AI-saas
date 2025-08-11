@@ -1,43 +1,76 @@
 import dotenv from 'dotenv';
-import { db } from '../database/connection';
 
-// Load test environment variables
+// Load test environment variables FIRST before any imports
 dotenv.config({ path: '.env.test' });
 
 // Set test environment
 process.env.NODE_ENV = 'test';
-
-// Mock console.log to reduce noise in tests
-global.console = {
-  ...console,
-  log: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
+process.env.PORT = '0'; // Use random available port for tests
 
 // Global test timeout
 jest.setTimeout(30000);
 
+// Lazy-load database connection to ensure environment is set up first
+function getDb() {
+  const { db } = require('../database/connection');
+  return db;
+}
+
 // Database setup functions
 export async function setupTestDatabase(): Promise<void> {
-  // Run migrations
-  await db.migrate.latest();
+  try {
+    const db = getDb();
+    // Run migrations
+    await db.migrate.latest();
+  } catch (error) {
+    console.error('Error setting up test database:', error);
+    throw error;
+  }
 }
 
 export async function cleanupTestDatabase(): Promise<void> {
   // Clean up all tables in reverse order to avoid foreign key constraints
-  await db('performance_metrics').del();
-  await db('conversation_metrics').del();
-  await db('analytics').del();
-  await db('messages').del();
-  await db('conversations').del();
-  await db('chatbots').del();
-  await db('usage_stats').del();
-  await db('user_profiles').del();
-  await db('users').del();
-  
-  // Close database connection
-  await db.destroy();
+  try {
+    const db = getDb();
+    const tables = [
+      'performance_metrics',
+      'conversation_metrics', 
+      'analytics',
+      'messages',
+      'conversations',
+      'chatbots',
+      'usage_stats',
+      'user_profiles',
+      'users'
+    ];
+
+    for (const table of tables) {
+      try {
+        await db(table).del();
+      } catch (error) {
+        // Ignore errors for tables that don't exist
+      }
+    }
+  } catch (error) {
+    console.error('Error cleaning up test database:', error);
+  }
 }
+
+// Setup and teardown for all tests
+beforeAll(async () => {
+  try {
+    await setupTestDatabase();
+  } catch (error) {
+    console.error('Failed to setup test database:', error);
+  }
+});
+
+afterAll(async () => {
+  try {
+    await cleanupTestDatabase();
+    const db = getDb();
+    await db.destroy();
+  } catch (error) {
+    console.error('Failed to cleanup test database:', error);
+  }
+});

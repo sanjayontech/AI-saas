@@ -3,6 +3,7 @@ import { User, Mail, Calendar, Edit2, Save, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, Button, Input } from '../../components/UI';
 import { validateName, validateEmail } from '../../utils/validation';
+import { UsageMonitor, DataExport, AccountDeletion } from '../../components/UserManagement';
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
@@ -266,6 +267,15 @@ const Profile = () => {
             </Card.Content>
           </Card>
         </div>
+      </div>
+
+      {/* Usage Monitoring */}
+      <UsageMonitor />
+
+      {/* Data Management */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DataExport />
+        <AccountDeletion />
       </div>
     </div>
   );

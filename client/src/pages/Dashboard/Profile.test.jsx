@@ -21,6 +21,25 @@ jest.mock('../../contexts/AuthContext', () => ({
   })
 }));
 
+// Mock the user management components
+jest.mock('../../components/UserManagement/UsageMonitor', () => {
+  return function UsageMonitor() {
+    return <div data-testid="usage-monitor">Usage Monitor Component</div>;
+  };
+});
+
+jest.mock('../../components/UserManagement/DataExport', () => {
+  return function DataExport() {
+    return <div data-testid="data-export">Data Export Component</div>;
+  };
+});
+
+jest.mock('../../components/UserManagement/AccountDeletion', () => {
+  return function AccountDeletion() {
+    return <div data-testid="account-deletion">Account Deletion Component</div>;
+  };
+});
+
 const MockedProfile = () => (
   <BrowserRouter>
     <Profile />
@@ -29,7 +48,7 @@ const MockedProfile = () => (
 
 describe('Profile', () => {
   beforeEach(() => {
-    mockUpdateProfile.mockClear();
+    jest.clearAllMocks();
   });
 
   it('renders profile information correctly', () => {
@@ -137,5 +156,31 @@ describe('Profile', () => {
     // Should exit edit mode
     expect(screen.queryByText('Save Changes')).not.toBeInTheDocument();
     expect(screen.getByText('Edit Profile')).toBeInTheDocument();
+  });
+
+  it('renders user management components', () => {
+    render(<MockedProfile />);
+    
+    expect(screen.getByTestId('usage-monitor')).toBeInTheDocument();
+    expect(screen.getByTestId('data-export')).toBeInTheDocument();
+    expect(screen.getByTestId('account-deletion')).toBeInTheDocument();
+  });
+
+  it('displays usage monitor component', () => {
+    render(<MockedProfile />);
+    
+    expect(screen.getByText('Usage Monitor Component')).toBeInTheDocument();
+  });
+
+  it('displays data export component', () => {
+    render(<MockedProfile />);
+    
+    expect(screen.getByText('Data Export Component')).toBeInTheDocument();
+  });
+
+  it('displays account deletion component', () => {
+    render(<MockedProfile />);
+    
+    expect(screen.getByText('Account Deletion Component')).toBeInTheDocument();
   });
 });

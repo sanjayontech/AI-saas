@@ -1,39 +1,26 @@
 import { Router } from 'express';
-import { UserManagementController } from '../controllers/UserManagementController';
-import { authenticate, requireEmailVerification } from '../middleware/auth';
-import rateLimit from 'express-rate-limit';
+import { AdminController } from '../controllers/AdminController';
+import { authenticate, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
-// Rate limiting for admin endpoints
-const adminLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // Higher limit for admin operations
-  message: {
-    error: {
-      code: 429,
-      message: 'Too many admin requests, please try again later.',
-      timestamp: new Date().toISOString(),
-    },
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// Admin authentication (no auth required for login)
+router.post('/login', AdminController.adminLogin);
+router.post('/create-admin', AdminController.createAdminUser); // For initial setup
 
-// TODO: Add admin role middleware when role-based access control is implemented
-// For now, we'll just require authentication and email verification
+// All routes below require admin authentication
 router.use(authenticate);
-router.use(requireEmailVerification);
+router.use(requireAdmin);
 
-// Admin user management endpoints
-router.get('/users/usage-stats', adminLimiter, UserManagementController.getAllUsageStats);
-router.post('/users/reset-monthly-stats', adminLimiter, UserManagementController.resetMonthlyUsageStats);
+// Dashboard and metrics
+router.get('/dashboard', AdminController.getDashboard);
+router.get('/metrics', AdminController.getSystemMetrics);
+router.get('/health', AdminController.getSystemHealth);
 
-// TODO: Add more admin endpoints as needed:
-// - Get all users
-// - Get user by ID
-// - Update user status (ban/unban)
-// - System health metrics
-// - Platform-wide analytics
+// User management
+router.get('/users', AdminController.getAllUsers);
+router.get('/users/:userId', AdminController.getUserById);
+router.put('/users/:userId/role', AdminController.updateUserRole);
+router.delete('/users/:userId', AdminController.deleteUser);
 
 export default router;

@@ -119,3 +119,33 @@ export const optionalAuth = async (
     next();
   }
 };
+
+export const requireAdmin = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!req.user) {
+    res.status(401).json({
+      error: {
+        code: 401,
+        message: 'Authentication required',
+        timestamp: new Date().toISOString()
+      }
+    });
+    return;
+  }
+
+  if (!req.user.isAdmin()) {
+    res.status(403).json({
+      error: {
+        code: 403,
+        message: 'Admin access required',
+        timestamp: new Date().toISOString()
+      }
+    });
+    return;
+  }
+  
+  next();
+};

@@ -17,9 +17,8 @@ const localStorageMock = {
 };
 global.localStorage = localStorageMock;
 
-// Mock window.location
-delete window.location;
-window.location = { href: 'http://localhost:3000' };
+// Mock window.location - simplified to avoid JSDOM navigation errors
+// Remove problematic location mock that causes test failures
 
 // Clean up after each test
 afterEach(() => {

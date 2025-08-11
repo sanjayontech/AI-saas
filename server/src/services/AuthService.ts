@@ -79,6 +79,9 @@ export class AuthService {
       throw new AuthenticationError('Invalid email or password');
     }
 
+    // Update last login time
+    await user.updateLastLogin();
+    
     const tokens = user.generateTokens();
     return { user, tokens };
   }
@@ -197,5 +200,66 @@ export class AuthService {
       throw new NotFoundError('User not found');
     }
     return user;
+  }
+
+  // Admin-specific authentication methods
+  static async adminLogin(data: LoginData): Promise<AuthResult> {
+    // Validate input
+    const { error } = User.getValidationSchema().login.validate(data);
+    if (error) {
+      throw new ValidationError(error.details[0].message);
+    }
+
+    // Find user by email
+    const user = await User.findByEmail(data.email.toLowerCase());
+    if (!user) {
+      throw new AuthenticationError('Invalid email or password');
+    }
+
+    // Check if user is admin
+    if (!user.isAdmin()) {
+      throw new AuthenticationError('Admin access required');
+    }
+
+    // Verify password
+    const isPasswordValid = await user.verifyPassword(data.password);
+    if (!isPasswordValid) {
+      throw new AuthenticationError('Invalid email or password');
+    }
+
+    // Update last login time
+    await user.updateLastLogin();
+    
+    const tokens = user.generateTokens();
+    return { user, tokens };
+  }
+
+  static async createAdminUser(data: RegisterData): Promise<AuthResult> {
+    // Validate input
+    const { error } = User.getValidationSchema().register.validate(data);
+    if (error) {
+      throw new ValidationError(error.details[0].message);
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findByEmail(data.email.toLowerCase());
+    if (existingUser) {
+      throw new ConflictError('User with this email already exists');
+    }
+
+    // Create admin user
+    const userData: UserData = {
+      email: data.email.toLowerCase(),
+      password: data.password,
+      firstName: data.firstName.trim(),
+      lastName: data.lastName.trim(),
+      role: 'admin',
+      emailVerified: true // Admin users are auto-verified
+    };
+
+    const user = await User.create(userData);
+    const tokens = user.generateTokens();
+
+    return { user, tokens };
   }
 }

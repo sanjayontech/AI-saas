@@ -6,6 +6,10 @@ import ChatWidgetDemo from './pages/ChatWidgetDemo'
 import DashboardLayout from './components/Layout/DashboardLayout'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
 import { Overview, Chatbots, Analytics, Profile, Settings } from './pages/Dashboard/'
+import { AdminLogin } from './pages/Admin/AdminLogin'
+import { AdminDashboard } from './pages/Admin/AdminDashboard'
+import { UserManagement } from './pages/Admin/UserManagement'
+import { SystemHealth } from './pages/Admin/SystemHealth'
 
 const App = () => {
 
@@ -52,6 +56,12 @@ const App = () => {
               </DashboardLayout>
             </ProtectedRoute>
           } />
+
+          {/* Admin Routes */}
+          <Route path='/admin/login' element={<AdminLogin />} />
+          <Route path='/admin/dashboard' element={<AdminDashboard />} />
+          <Route path='/admin/users' element={<UserManagement />} />
+          <Route path='/admin/health' element={<SystemHealth />} />
           
           <Route 
             path='/' 

@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import Joi from 'joi';
 import { db } from '../database/connection';
 
+export type UserRole = 'user' | 'admin';
+
 export interface UserData {
   id?: string;
   email: string;
@@ -10,10 +12,12 @@ export interface UserData {
   passwordHash?: string;
   firstName: string;
   lastName: string;
+  role?: UserRole;
   emailVerified?: boolean;
   emailVerificationToken?: string | null;
   passwordResetToken?: string | null;
   passwordResetExpires?: Date | null;
+  lastLoginAt?: Date | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -29,10 +33,12 @@ export class User {
   public passwordHash: string;
   public firstName: string;
   public lastName: string;
+  public role: UserRole;
   public emailVerified: boolean;
   public emailVerificationToken?: string | null;
   public passwordResetToken?: string | null;
   public passwordResetExpires?: Date | null;
+  public lastLoginAt?: Date | null;
   public createdAt?: Date;
   public updatedAt?: Date;
 
@@ -42,10 +48,12 @@ export class User {
     this.passwordHash = data.passwordHash || '';
     this.firstName = data.firstName;
     this.lastName = data.lastName;
+    this.role = data.role || 'user';
     this.emailVerified = data.emailVerified || false;
     this.emailVerificationToken = data.emailVerificationToken;
     this.passwordResetToken = data.passwordResetToken;
     this.passwordResetExpires = data.passwordResetExpires;
+    this.lastLoginAt = data.lastLoginAt;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
   }
@@ -99,11 +107,17 @@ export class User {
     return bcrypt.compare(password, this.passwordHash);
   }
 
+  // Check if user is admin
+  isAdmin(): boolean {
+    return this.role === 'admin';
+  }
+
   // Generate JWT tokens
   generateTokens(): AuthTokens {
     const payload = {
       id: this.id,
       email: this.email,
+      role: this.role,
       emailVerified: this.emailVerified
     };
 
@@ -136,6 +150,7 @@ export class User {
         password_hash: hashedPassword,
         first_name: userData.firstName,
         last_name: userData.lastName,
+        role: userData.role || 'user',
         email_verification_token: userData.emailVerificationToken
       })
       .returning('*');
@@ -146,10 +161,12 @@ export class User {
       passwordHash: user.password_hash,
       firstName: user.first_name,
       lastName: user.last_name,
+      role: user.role,
       emailVerified: user.email_verified,
       emailVerificationToken: user.email_verification_token,
       passwordResetToken: user.password_reset_token,
       passwordResetExpires: user.password_reset_expires,
+      lastLoginAt: user.last_login_at,
       createdAt: user.created_at,
       updatedAt: user.updated_at
     });
@@ -166,10 +183,12 @@ export class User {
       passwordHash: user.password_hash,
       firstName: user.first_name,
       lastName: user.last_name,
+      role: user.role,
       emailVerified: user.email_verified,
       emailVerificationToken: user.email_verification_token,
       passwordResetToken: user.password_reset_token,
       passwordResetExpires: user.password_reset_expires,
+      lastLoginAt: user.last_login_at,
       createdAt: user.created_at,
       updatedAt: user.updated_at
     });
@@ -186,10 +205,12 @@ export class User {
       passwordHash: user.password_hash,
       firstName: user.first_name,
       lastName: user.last_name,
+      role: user.role,
       emailVerified: user.email_verified,
       emailVerificationToken: user.email_verification_token,
       passwordResetToken: user.password_reset_token,
       passwordResetExpires: user.password_reset_expires,
+      lastLoginAt: user.last_login_at,
       createdAt: user.created_at,
       updatedAt: user.updated_at
     });
@@ -203,10 +224,12 @@ export class User {
         password_hash: this.passwordHash,
         first_name: this.firstName,
         last_name: this.lastName,
+        role: this.role,
         email_verified: this.emailVerified,
         email_verification_token: this.emailVerificationToken,
         password_reset_token: this.passwordResetToken,
         password_reset_expires: this.passwordResetExpires,
+        last_login_at: this.lastLoginAt,
         updated_at: new Date()
       })
       .returning('*');
@@ -217,10 +240,12 @@ export class User {
       passwordHash: updatedUser.password_hash,
       firstName: updatedUser.first_name,
       lastName: updatedUser.last_name,
+      role: updatedUser.role,
       emailVerified: updatedUser.email_verified,
       emailVerificationToken: updatedUser.email_verification_token,
       passwordResetToken: updatedUser.password_reset_token,
       passwordResetExpires: updatedUser.password_reset_expires,
+      lastLoginAt: updatedUser.last_login_at,
       createdAt: updatedUser.created_at,
       updatedAt: updatedUser.updated_at
     });
@@ -237,10 +262,12 @@ export class User {
       passwordHash: user.password_hash,
       firstName: user.first_name,
       lastName: user.last_name,
+      role: user.role,
       emailVerified: user.email_verified,
       emailVerificationToken: user.email_verification_token,
       passwordResetToken: user.password_reset_token,
       passwordResetExpires: user.password_reset_expires,
+      lastLoginAt: user.last_login_at,
       createdAt: user.created_at,
       updatedAt: user.updated_at
     });
@@ -260,12 +287,56 @@ export class User {
       passwordHash: user.password_hash,
       firstName: user.first_name,
       lastName: user.last_name,
+      role: user.role,
       emailVerified: user.email_verified,
       emailVerificationToken: user.email_verification_token,
       passwordResetToken: user.password_reset_token,
       passwordResetExpires: user.password_reset_expires,
+      lastLoginAt: user.last_login_at,
       createdAt: user.created_at,
       updatedAt: user.updated_at
     });
+  }
+
+  // Admin-specific methods
+  static async findAllUsers(limit: number = 50, offset: number = 0): Promise<User[]> {
+    const users = await db('users')
+      .select('*')
+      .orderBy('created_at', 'desc')
+      .limit(limit)
+      .offset(offset);
+
+    return users.map(user => new User({
+      id: user.id,
+      email: user.email,
+      passwordHash: user.password_hash,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      role: user.role,
+      emailVerified: user.email_verified,
+      emailVerificationToken: user.email_verification_token,
+      passwordResetToken: user.password_reset_token,
+      passwordResetExpires: user.password_reset_expires,
+      lastLoginAt: user.last_login_at,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at
+    }));
+  }
+
+  static async getUserCount(): Promise<number> {
+    const result = await db('users').count('id as count').first();
+    return parseInt(result?.count as string) || 0;
+  }
+
+  static async getAdminCount(): Promise<number> {
+    const result = await db('users').where({ role: 'admin' }).count('id as count').first();
+    return parseInt(result?.count as string) || 0;
+  }
+
+  async updateLastLogin(): Promise<void> {
+    this.lastLoginAt = new Date();
+    await db('users')
+      .where({ id: this.id })
+      .update({ last_login_at: this.lastLoginAt });
   }
 }

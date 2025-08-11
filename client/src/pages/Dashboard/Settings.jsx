@@ -1,8 +1,31 @@
-import React from 'react';
-import { Settings as SettingsIcon, Bell, Shield, Palette } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Settings as SettingsIcon, Bell, Shield, Palette, Key } from 'lucide-react';
 import { Card, Button, Select } from '../../components/UI';
+import { useAuth } from '../../contexts/AuthContext';
+import ChangePasswordForm from '../../components/Auth/ChangePasswordForm';
 
 const Settings = () => {
+  const { user, updateProfile } = useAuth();
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [preferences, setPreferences] = useState({
+    theme: 'light',
+    language: 'en',
+    timezone: 'UTC',
+    emailNotifications: true,
+    usageAlerts: true,
+    weeklyReports: false,
+    dataCollection: true
+  });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    // Load user preferences if available
+    if (user?.preferences) {
+      setPreferences(prev => ({ ...prev, ...user.preferences }));
+    }
+  }, [user]);
+
   const themeOptions = [
     { value: 'light', label: 'Light' },
     { value: 'dark', label: 'Dark' },
@@ -24,6 +47,27 @@ const Settings = () => {
     { value: 'America/Los_Angeles', label: 'Pacific Time' },
   ];
 
+  const handlePreferenceChange = (key, value) => {
+    setPreferences(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const handleSaveSettings = async () => {
+    setLoading(true);
+    setSuccess('');
+
+    const result = await updateProfile({ preferences });
+    
+    if (result.success) {
+      setSuccess('Settings saved successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    }
+    
+    setLoading(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -33,6 +77,12 @@ const Settings = () => {
           Customize your experience and manage your preferences
         </p>
       </div>
+
+      {success && (
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+          {success}
+        </div>
+      )}
 
       {/* Settings Sections */}
       <div className="space-y-6">
@@ -49,12 +99,14 @@ const Settings = () => {
               <Select
                 label="Theme"
                 options={themeOptions}
-                defaultValue="light"
+                value={preferences.theme}
+                onChange={(value) => handlePreferenceChange('theme', value)}
               />
               <Select
                 label="Language"
                 options={languageOptions}
-                defaultValue="en"
+                value={preferences.language}
+                onChange={(value) => handlePreferenceChange('language', value)}
               />
             </div>
           </Card.Content>
@@ -78,7 +130,8 @@ const Settings = () => {
                 <input
                   type="checkbox"
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  defaultChecked
+                  checked={preferences.emailNotifications}
+                  onChange={(e) => handlePreferenceChange('emailNotifications', e.target.checked)}
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -89,7 +142,8 @@ const Settings = () => {
                 <input
                   type="checkbox"
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  defaultChecked
+                  checked={preferences.usageAlerts}
+                  onChange={(e) => handlePreferenceChange('usageAlerts', e.target.checked)}
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -100,6 +154,8 @@ const Settings = () => {
                 <input
                   type="checkbox"
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  checked={preferences.weeklyReports}
+                  onChange={(e) => handlePreferenceChange('weeklyReports', e.target.checked)}
                 />
               </div>
             </div>
@@ -119,7 +175,8 @@ const Settings = () => {
               <Select
                 label="Timezone"
                 options={timezoneOptions}
-                defaultValue="UTC"
+                value={preferences.timezone}
+                onChange={(value) => handlePreferenceChange('timezone', value)}
               />
               <div className="flex items-center justify-between">
                 <div>
@@ -129,11 +186,18 @@ const Settings = () => {
                 <input
                   type="checkbox"
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  defaultChecked
+                  checked={preferences.dataCollection}
+                  onChange={(e) => handlePreferenceChange('dataCollection', e.target.checked)}
                 />
               </div>
               <div className="pt-4 border-t border-gray-200">
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowPasswordForm(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Key className="h-4 w-4" />
                   Change Password
                 </Button>
               </div>
@@ -141,10 +205,28 @@ const Settings = () => {
           </Card.Content>
         </Card>
 
+        {/* Password Change Modal */}
+        {showPasswordForm && (
+          <Card>
+            <Card.Header>
+              <div className="flex items-center">
+                <Key className="h-5 w-5 text-gray-400 mr-2" />
+                <Card.Title>Change Password</Card.Title>
+              </div>
+            </Card.Header>
+            <Card.Content>
+              <ChangePasswordForm onClose={() => setShowPasswordForm(false)} />
+            </Card.Content>
+          </Card>
+        )}
+
         {/* Save Changes */}
         <div className="flex justify-end">
-          <Button>
-            Save Changes
+          <Button 
+            onClick={handleSaveSettings}
+            disabled={loading}
+          >
+            {loading ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
       </div>

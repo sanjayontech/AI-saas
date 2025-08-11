@@ -1,7 +1,7 @@
 import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
-  return Promise.all([
+  await Promise.all([
     // Update analytics table to match our model
     knex.schema.alterTable('analytics', (table) => {
       table.decimal('avg_response_time', 8, 2).defaultTo(0);
@@ -54,7 +54,7 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  return Promise.all([
+  await Promise.all([
     knex.schema.dropTableIfExists('performance_metrics'),
     knex.schema.dropTableIfExists('conversation_metrics'),
     knex.schema.alterTable('analytics', (table) => {

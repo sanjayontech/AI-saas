@@ -4,6 +4,7 @@ import { User } from '../models/User';
 export interface JWTPayload {
   id: string;
   email: string;
+  role: string;
   emailVerified: boolean;
   iat?: number;
   exp?: number;
@@ -20,6 +21,7 @@ export class JWTUtils {
     const payload: JWTPayload = {
       id: user.id!,
       email: user.email,
+      role: user.role,
       emailVerified: user.emailVerified
     };
 

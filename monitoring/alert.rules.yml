@@ -1,0 +1,116 @@
+# Prometheus Alert Rules for AI Chatbot SaaS
+
+groups:
+  - name: ai-chatbot-alerts
+    rules:
+      # High error rate
+      - alert: HighErrorRate
+        expr: (http_requests_failed_total / http_requests_total) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }}% for the last 5 minutes"
+
+      # High response time
+      - alert: HighResponseTime
+        expr: http_request_duration_ms > 2000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time detected"
+          description: "Average response time is {{ $value }}ms"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: (process_memory_heap_used_bytes / process_memory_heap_total_bytes) * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}%"
+
+      # Application down
+      - alert: ApplicationDown
+        expr: up{job="ai-chatbot-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Application is down"
+          description: "AI Chatbot SaaS application is not responding"
+
+      # Database connection issues
+      - alert: DatabaseConnectionIssues
+        expr: up{job="postgres-exporter"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection issues"
+          description: "Cannot connect to PostgreSQL database"
+
+      # Redis connection issues
+      - alert: RedisConnectionIssues
+        expr: up{job="redis-exporter"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis connection issues"
+          description: "Cannot connect to Redis cache"
+
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      # Low disk space
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space is {{ $value }}% full on {{ $labels.instance }}"
+
+      # Too many database connections
+      - alert: TooManyDatabaseConnections
+        expr: pg_stat_activity_count > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Too many database connections"
+          description: "Database has {{ $value }} active connections"
+
+  - name: business-metrics
+    rules:
+      # Low chatbot usage
+      - alert: LowChatbotUsage
+        expr: increase(http_requests_total{endpoint="/api/v1/widget"}[1h]) < 10
+        for: 1h
+        labels:
+          severity: info
+        annotations:
+          summary: "Low chatbot usage"
+          description: "Only {{ $value }} chatbot requests in the last hour"
+
+      # High API usage (potential abuse)
+      - alert: HighAPIUsage
+        expr: increase(http_requests_total[5m]) > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API usage detected"
+          description: "{{ $value }} API requests in the last 5 minutes"

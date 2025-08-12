@@ -38,4 +38,5 @@ const Select = ({
   );
 };
 
+export { Select };
 export default Select;

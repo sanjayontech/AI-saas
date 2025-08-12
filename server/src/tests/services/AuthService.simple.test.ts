@@ -1,18 +1,20 @@
 import { AuthService } from '../../services/AuthService';
 import { User } from '../../models/User';
-import { TestDataFactory, TestCleanup } from '../utils/testHelpers';
+import { TestDataFactory, TestCleanup, TestAssertions } from '../utils/testHelpers';
 import { 
   ValidationError, 
   AuthenticationError, 
   ConflictError, 
   NotFoundError 
 } from '../../utils/errors';
+import { mockEmailService } from '../mocks/email';
 
-describe('AuthService - Integration Tests', () => {
-  let authService: AuthService;
+describe('AuthService - Unit Tests', () => {
 
-  beforeAll(() => {
-    authService = new AuthService();
+  beforeEach(() => {
+    // Clear all mocks before each test
+    jest.clearAllMocks();
+    mockEmailService.clearSentEmails();
   });
 
   afterEach(async () => {
@@ -28,81 +30,83 @@ describe('AuthService - Integration Tests', () => {
         lastName: 'User'
       };
 
-      const result = await authService.register(userData);
+      const result = await AuthService.register(userData);
 
-      expect(result.user).toBeDefined();
+      TestAssertions.expectValidUser(result.user);
       expect(result.user.email).toBe(userData.email);
       expect(result.user.firstName).toBe(userData.firstName);
       expect(result.user.lastName).toBe(userData.lastName);
       expect(result.user.emailVerified).toBe(false);
-      expect(result.tokens).toBeDefined();
-      expect(result.tokens.accessToken).toBeDefined();
-      expect(result.tokens.refreshToken).toBeDefined();
-    });
+      TestAssertions.expectValidTokens(result.tokens);
+    })
 
-    it('should throw ConflictError for duplicate email', async () => {
+    it('should throw ConflictError for duplicate email', a() => {
       const userData = {
         email: 'duplicate@example.com',
         password: 'TestPassword123!',
-        firstName: 'Test',
-        lastName: 'User'
+       ,
+
       };
 
       // Register first user
-      await authService.register(userData);
+      await AuthService.register(usera);
 
-      // Try to register with same email
-      await expect(authService.register(userData))
-        .rejects
+      // Try to registerl
+      awata))
+ts
         .toThrow(ConflictError);
     });
 
-    it('should throw ValidationError for invalid email', async () => {
+    it('should throw ValidationError for
       const userData = {
-        email: 'invalid-email',
-        password: 'TestPassword123!',
-        firstName: 'Test',
-        lastName: 'User'
+        email: '
+        password: 'TestPassword1!',
+       Test',
+
       };
 
-      await expect(authService.register(userData))
+      await expect(AuthService.a))
         .rejects
-        .toThrow(ValidationError);
+        .toThrow(Validatio
     });
 
-    it('should throw ValidationError for weak password', async () => {
+{
       const userData = {
-        email: 'test@example.com',
+        email: '
         password: 'weak',
-        firstName: 'Test',
-        lastName: 'User'
+       ',
+
       };
 
-      await expect(authService.register(userData))
+      await expect(AuthService.reg
         .rejects
-        .toThrow(ValidationError);
+        .toThrow(Validatioor);
     });
   });
 
   describe('login', () => {
-    it('should login user successfully with valid credentials', async () => {
+    it('should l{
       // Create test user
-      const testUser = await TestDataFactory.createTestUser({
+      c
+     ',
+
+      });
+
+      const result = awaiogin({
         email: 'login@example.com',
         password: 'TestPassword123!'
       });
 
-      const result = await authService.login('login@example.com', 'TestPassword123!');
-
-      expect(result.user).toBeDefined();
+ser);
       expect(result.user.email).toBe('login@example.com');
-      expect(result.tokens).toBeDefined();
-      expect(result.tokens.accessToken).toBeDefined();
-      expect(result.tokens.refreshToken).toBeDefined();
+ns);
     });
 
-    it('should throw AuthenticationError for invalid email', async () => {
-      await expect(authService.login('nonexistent@example.com', 'password'))
+    it('should throw AuthenticationError for invalid e=> {
+      aogin({
+m',
+        password: 'password'
+      }))
         .rejects
         .toThrow(AuthenticationError);
     });
@@ -114,136 +118,147 @@ describe('AuthService - Integration Tests', () => {
         password: 'TestPassword123!'
       });
 
-      await expect(authService.login('wrongpass@example.com', 'wrongpassword'))
-        .rejects
+      await expect(AuthService.login({
+        email: '
+        password: 'wrongpassword'
+      }))
+s
         .toThrow(AuthenticationError);
     });
 
-    it('should throw AuthenticationError for unverified email', async () => {
+    it('should throw AuthenticationErrornc () => {
       // Create unverified user
-      await TestDataFactory.createTestUser({
-        email: 'unverified@example.com',
-        password: 'TestPassword123!',
+      await TestDataFactory.er({
+        e',
+
         emailVerified: false
       });
 
-      await expect(authService.login('unverified@example.com', 'TestPassword123!'))
+      a({
+     
+'
+      }))
         .rejects
         .toThrow(AuthenticationError);
     });
   });
 
   describe('refreshToken', () => {
-    it('should refresh token successfully', async () => {
+ {
       // Create test user and get tokens
       const testUser = await TestDataFactory.createTestUser();
-      const loginResult = await authService.login(testUser.user.email, 'testpassword123');
+      c
+er.email,
+        password: 'testpassword123'
+      });
 
-      const result = await authService.refreshToken(loginResult.tokens.refreshToken);
+      const result = await AuthService;
 
-      expect(result.accessToken).toBeDefined();
-      expect(result.refreshToken).toBeDefined();
-      expect(result.accessToken).not.toBe(loginResult.tokens.accessToken);
+     
+sToken);
     });
 
-    it('should throw AuthenticationError for invalid refresh token', async () => {
-      await expect(authService.refreshToken('invalid-token'))
+    it('should throw AuthenticationError for {
+      await expect(AuthS
         .rejects
-        .toThrow(AuthenticationError);
+        .toThrow(AuthenticationError)
     });
   });
 
-  describe('verifyEmail', () => {
+> {
     it('should verify email successfully', async () => {
       // Create user with verification token
-      const userData = {
+      ata = {
         email: 'verify@example.com',
-        password: 'TestPassword123!',
+',
         firstName: 'Test',
-        lastName: 'User'
+ser'
       };
 
-      const registerResult = await authService.register(userData);
+      const registerResult = await AuthS
       const user = await User.findById(registerResult.user.id!);
       
       expect(user?.emailVerificationToken).toBeDefined();
 
-      const result = await authService.verifyEmail(user!.emailVerificationToken!);
 
-      expect(result).toBe(true);
 
-      // Check that user is now verified
-      const verifiedUser = await User.findById(registerResult.user.id!);
-      expect(verifiedUser?.emailVerified).toBe(true);
-      expect(verifiedUser?.emailVerificationToken).toBeNull();
+      expect(result.emailVerified).toBe(true);
+
+      // Check that user is now 
+      c);
+     
+ull();
     });
 
-    it('should throw NotFoundError for invalid token', async () => {
-      await expect(authService.verifyEmail('invalid-token'))
-        .rejects
-        .toThrow(NotFoundError);
+    it('should throw NotFoundError for invalid token', async {
+      await expect(AuthService.ver
+        .ects
+;
     });
   });
 
-  describe('requestPasswordReset', () => {
-    it('should create password reset token for existing user', async () => {
-      const testUser = await TestDataFactory.createTestUser({
+=> {
+    it('should create password reset token {
+      const testUser = await TestDataFactory.createTestUse{
         email: 'reset@example.com'
       });
 
-      const result = await authService.requestPasswordReset('reset@example.com');
+      await AuthService.requestPasswordReset(om');
 
-      expect(result).toBe(true);
-
-      // Check that reset token was created
-      const user = await User.findById(testUser.user.id!);
+      // Check that reset token was creat
+      const user = await User.findById(testUser.user.id!)
       expect(user?.passwordResetToken).toBeDefined();
-      expect(user?.passwordResetExpires).toBeDefined();
-    });
+      e
+;
 
-    it('should return false for non-existent user', async () => {
-      const result = await authService.requestPasswordReset('nonexistent@example.com');
-      expect(result).toBe(false);
+    it('should not throw error for non-existent user', async () => {
+      // Should not throw error f
+      a
+     s
+();
     });
   });
 
   describe('resetPassword', () => {
-    it('should reset password successfully', async () => {
-      const testUser = await TestDataFactory.createTestUser({
+    it('s () => {
+({
         email: 'resetpass@example.com'
       });
 
       // Request password reset
-      await authService.requestPasswordReset('resetpass@example.com');
+      await AuthService.requestPasswordReset('reset
       
       const user = await User.findById(testUser.user.id!);
-      const resetToken = user!.passwordResetToken!;
 
-      const result = await authService.resetPassword(resetToken, 'NewPassword123!');
 
-      expect(result).toBe(true);
 
-      // Verify user can login with new password
-      const loginResult = await authService.login('resetpass@example.com', 'NewPassword123!');
-      expect(loginResult.user).toBeDefined();
+
+      expect(result.id).toBe(testUser.user.id);
+
+      /word
+{
+        email: 'resetpass@example.com',
+        password: 'NewPassword123!'
+      });
+      expect(loginResult.user).tned();
     });
 
     it('should throw NotFoundError for invalid token', async () => {
-      await expect(authService.resetPassword('invalid-token', 'NewPassword123!'))
+      await expect(AuthService.resetPassword('invalid-token', 23!'))
         .rejects
-        .toThrow(NotFoundError);
+      dError);
     });
 
-    it('should throw ValidationError for weak password', async () => {
+=> {
       const testUser = await TestDataFactory.createTestUser();
-      await authService.requestPasswordReset(testUser.user.email);
+      await Authil);
       
-      const user = await User.findById(testUser.user.id!);
-      const resetToken = user!.passwordResetToken!;
-
-      await expect(authService.resetPassword(resetToken, 'weak'))
-        .rejects
-        .toThrow(ValidationError);
-    });
+      c!);
+     etToken!;
+   ););
   });
-});
+} }ror);
+   ionErlidattoThrow(Va .   ects
+        .rej   'weak'))
+ Token, ssword(resetvice.resetPaer(AuthSt expect  awai
+ 

@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { app } from '../testApp';
-import { TestDataFactory, TestCleanup } from '../utils/testHelpers';
+import { TestDataFactory, TestCleanup, TestAssertions } from '../utils/testHelpers';
 
-describe('AuthController - Integration Tests', () => {
+describe('AuthController - Unit Tests', () => {
   afterEach(async () => {
     await TestCleanup.cleanupAll();
   });

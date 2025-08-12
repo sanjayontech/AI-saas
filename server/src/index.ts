@@ -10,6 +10,8 @@ import { Server } from 'socket.io';
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
 import { rateLimiter } from './middleware/rateLimiter';
+// import { monitoringMiddleware, errorTrackingMiddleware } from './middleware/monitoring';
+// import { logger, requestLoggingMiddleware } from './services/LoggingService';
 import routes from './routes';
 
 // Load environment variables
@@ -19,7 +21,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: process.env.CLIENT_URL || 'http://localhost:5173',
+        origin: process.env.CLIENT_URL || 'http://localhost:3000',
         methods: ['GET', 'POST'],
     },
 });
@@ -29,7 +31,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(helmet());
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: process.env.CLIENT_URL || 'http://localhost:3000',
     credentials: true,
 }));
 app.use(compression());
@@ -37,12 +39,40 @@ app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(rateLimiter);
+// app.use(requestLoggingMiddleware);
+// app.use(monitoringMiddleware);
+
+// Health check routes (available at root level for load balancers)
+app.get('/health', async (req, res) => {
+    try {
+        res.status(200).json({
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            uptime: process.uptime(),
+            environment: process.env.NODE_ENV || 'development'
+        });
+    } catch (error) {
+        res.status(503).json({
+            status: 'unhealthy',
+            timestamp: new Date().toISOString(),
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+app.get('/health/live', (req, res) => {
+    res.status(200).json({
+        status: 'alive',
+        timestamp: new Date().toISOString()
+    });
+});
 
 // API routes
 app.use('/api/v1', routes);
 
 // Error handling middleware
 app.use(notFound);
+// app.use(errorTrackingMiddleware);
 app.use(errorHandler);
 
 // Socket.IO connection handling
@@ -103,6 +133,12 @@ io.on('connection', (socket) => {
 
 // Start server
 server.listen(PORT, () => {
+    // logger.info(`Server started on port ${PORT}`, {
+    //     environment: process.env.NODE_ENV || 'development',
+    //     nodeVersion: process.version,
+    //     pid: process.pid
+    // });
+    
     console.log(`Server running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });

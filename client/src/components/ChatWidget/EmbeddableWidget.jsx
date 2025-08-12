@@ -10,7 +10,7 @@ class EmbeddableChatWidget {
       position: 'bottom-right',
       theme: {},
       containerId: null,
-      serverUrl: 'http://localhost:3000',
+      serverUrl: 'http://localhost:3001',
       ...config
     };
     
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
   scripts.forEach(script => {
     const chatbotId = script.getAttribute('data-chatbot-id');
     const position = script.getAttribute('data-position') || 'bottom-right';
-    const serverUrl = script.getAttribute('data-server-url') || 'http://localhost:3000';
+    const serverUrl = script.getAttribute('data-server-url') || 'http://localhost:3001';
     
     // Parse theme from data attributes
     const theme = {};

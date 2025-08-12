@@ -5,6 +5,7 @@ dotenv.config({ path: '.env.test' });
 
 // Set test environment
 process.env.NODE_ENV = 'test';
+process.env.USE_SQLITE = 'true'; // Ensure SQLite is used for tests
 process.env.PORT = '0'; // Use random available port for tests
 
 // Global test timeout

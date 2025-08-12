@@ -2,22 +2,11 @@ import { ChatbotService } from '../../services/ChatbotService';
 import { Chatbot } from '../../models/Chatbot';
 import { Conversation } from '../../models/Conversation';
 import { Message } from '../../models/Message';
-import { TestDataFactory, TestCleanup } from '../utils/testHelpers';
+import { TestDataFactory, TestCleanup, TestAssertions } from '../utils/testHelpers';
 import { ValidationError, NotFoundError, AuthorizationError } from '../../utils/errors';
+import { mockGoogleAIService } from '../mocks/googleAI';
 
-// Mock Google AI Service
-jest.mock('../../services/GoogleAIService', () => {
-  return {
-    GoogleAIService: jest.fn().mockImplementation(() => ({
-      generateResponse: jest.fn().mockResolvedValue({
-        content: 'This is a test AI response',
-        usage: { promptTokens: 10, completionTokens: 15, totalTokens: 25 }
-      })
-    }))
-  };
-});
-
-describe('ChatbotService - Integration Tests', () => {
+describe('ChatbotService - Unit Tests', () => {
   let chatbotService: ChatbotService;
   let testUser: any;
 
@@ -27,6 +16,7 @@ describe('ChatbotService - Integration Tests', () => {
 
   beforeEach(async () => {
     testUser = await TestDataFactory.createTestUser();
+    jest.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -58,7 +48,7 @@ describe('ChatbotService - Integration Tests', () => {
 
       const result = await chatbotService.createChatbot(testUser.user.id!, chatbotData);
 
-      expect(result).toBeDefined();
+      TestAssertions.expectValidChatbot(result);
       expect(result.name).toBe(chatbotData.name);
       expect(result.description).toBe(chatbotData.description);
       expect(result.personality).toBe(chatbotData.personality);
@@ -84,7 +74,7 @@ describe('ChatbotService - Integration Tests', () => {
 
       const result = await chatbotService.getChatbotById(chatbot.id!, testUser.user.id!);
 
-      expect(result).toBeDefined();
+      TestAssertions.expectValidChatbot(result);
       expect(result!.id).toBe(chatbot.id);
       expect(result!.name).toBe(chatbot.name);
     });
@@ -115,7 +105,7 @@ describe('ChatbotService - Integration Tests', () => {
 
       const result = await chatbotService.updateChatbot(chatbot.id!, testUser.user.id!, updateData);
 
-      expect(result).toBeDefined();
+      TestAssertions.expectValidChatbot(result);
       expect(result.name).toBe(updateData.name);
       expect(result.description).toBe(updateData.description);
     });
@@ -171,9 +161,12 @@ describe('ChatbotService - Integration Tests', () => {
       );
 
       expect(result).toBeDefined();
-      expect(result.response).toBe('This is a test AI response');
+      expect(result.response).toBe('This is a mock AI response for testing purposes.');
       expect(result.conversationId).toBeDefined();
       expect(result.messageId).toBeDefined();
+      
+      // Verify Google AI service was called
+      expect(mockGoogleAIService.generateResponse).toHaveBeenCalledTimes(1);
     });
 
     it('should create new conversation for new session', async () => {

@@ -42,7 +42,7 @@ const ChatWidget = ({
     // Fetch widget configuration from server
     const fetchConfig = async () => {
       try {
-        const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:3000';
+        const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
         const response = await fetch(`${serverUrl}/api/v1/widget/${chatbotId}/config`);
         
         if (response.ok) {
@@ -65,7 +65,7 @@ const ChatWidget = ({
     fetchConfig();
 
     // Initialize socket connection
-    const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:3000';
+    const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
     socketRef.current = io(serverUrl, {
       transports: ['websocket', 'polling']
     });

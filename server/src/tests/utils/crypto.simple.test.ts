@@ -1,6 +1,6 @@
 import { CryptoUtils } from '../../utils/crypto';
 
-describe('Crypto Utils - Simple Tests', () => {
+describe('Crypto Utils - Unit Tests', () => {
   describe('Secure Token Generation', () => {
     it('should generate secure token of default length', () => {
       const token = CryptoUtils.generateSecureToken();

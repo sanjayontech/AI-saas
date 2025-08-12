@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:3000/api/v1';
+import API_CONFIG from '../config/api';
+
+const API_BASE_URL = API_CONFIG.BASE_URL;
 
 // Generic API request helper
 const apiRequest = async (endpoint, options = {}) => {
@@ -18,11 +20,24 @@ const apiRequest = async (endpoint, options = {}) => {
     const data = await response.json();
     
     if (!response.ok) {
+      // Handle authentication errors
+      if (response.status === 401) {
+        // Clear invalid token and redirect to login
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/auth';
+        throw new Error('Authentication required');
+      }
+      
       throw new Error(data.error?.message || 'API request failed');
     }
     
     return data;
   } catch (error) {
+    // Handle network errors
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Unable to connect to server. Please check your connection.');
+    }
     throw new Error(error.message || 'Network error');
   }
 };

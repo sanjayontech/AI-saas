@@ -2,7 +2,7 @@ import { JWTUtils } from '../../utils/jwt';
 import { User } from '../../models/User';
 import { TestCleanup } from '../utils/testHelpers';
 
-describe('JWT Utils - Simple Tests', () => {
+describe('JWT Utils - Unit Tests', () => {
   let testUser: User;
 
   beforeEach(async () => {

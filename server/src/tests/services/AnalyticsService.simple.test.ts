@@ -2,10 +2,10 @@ import { AnalyticsService } from '../../services/AnalyticsService';
 import { Analytics } from '../../models/Analytics';
 import { ConversationMetrics } from '../../models/ConversationMetrics';
 import { PerformanceMetrics } from '../../models/PerformanceMetrics';
-import { TestDataFactory, TestCleanup } from '../utils/testHelpers';
+import { TestDataFactory, TestCleanup, TestAssertions } from '../utils/testHelpers';
 import { NotFoundError, AuthorizationError } from '../../utils/errors';
 
-describe('AnalyticsService - Integration Tests', () => {
+describe('AnalyticsService - Unit Tests', () => {
   let analyticsService: AnalyticsService;
   let testUser: any;
   let testChatbot: any;

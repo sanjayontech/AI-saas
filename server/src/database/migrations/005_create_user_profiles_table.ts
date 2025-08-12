@@ -9,7 +9,11 @@ export async function up(knex: Knex): Promise<void> {
       table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
       table.uuid('user_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
     }
-    table.json('preferences').defaultTo('{}');
+    if (knex.client.config.client === 'sqlite3') {
+      table.text('preferences').defaultTo('{}');
+    } else {
+      table.json('preferences').defaultTo('{}');
+    }
     table.timestamps(true, true);
     
     table.index(['user_id']);

@@ -1,10 +1,10 @@
 import { UserManagementService } from '../../services/UserManagementService';
 import { UserProfile } from '../../models/UserProfile';
 import { UsageStats } from '../../models/UsageStats';
-import { TestDataFactory, TestCleanup } from '../utils/testHelpers';
+import { TestDataFactory, TestCleanup, TestAssertions } from '../utils/testHelpers';
 import { NotFoundError, ValidationError } from '../../utils/errors';
 
-describe('UserManagementService - Integration Tests', () => {
+describe('UserManagementService - Unit Tests', () => {
   let userManagementService: UserManagementService;
   let testUser: any;
 

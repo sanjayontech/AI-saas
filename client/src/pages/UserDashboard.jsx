@@ -22,7 +22,7 @@ const UserDashboard = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:3000/api/v1/users/profile', {
+      const response = await fetch('http://localhost:3001/api/v1/users/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -56,7 +56,7 @@ const UserDashboard = () => {
   const trackMessage = async () => {
     try {
       const token = localStorage.getItem('token');
-      await fetch('http://localhost:3000/api/v1/users/track/message', {
+      await fetch('http://localhost:3001/api/v1/users/track/message', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -71,7 +71,7 @@ const UserDashboard = () => {
   const trackChatbot = async () => {
     try {
       const token = localStorage.getItem('token');
-      await fetch('http://localhost:3000/api/v1/users/track/chatbot', {
+      await fetch('http://localhost:3001/api/v1/users/track/chatbot', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -86,7 +86,7 @@ const UserDashboard = () => {
   const updatePreferences = async (newPreferences) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/v1/users/profile', {
+      const response = await fetch('http://localhost:3001/api/v1/users/profile', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -106,7 +106,7 @@ const UserDashboard = () => {
   const exportData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/v1/users/export', {
+      const response = await fetch('http://localhost:3001/api/v1/users/export', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

@@ -1,12 +1,66 @@
-# React + Vite
+# AI Chatbot SaaS - Client Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React frontend application for the AI Chatbot SaaS platform, built with Vite and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Environment Variables
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The application uses Vite environment variables (prefixed with `VITE_`):
 
-## Expanding the ESLint configuration
+- `VITE_API_URL` - Backend API URL (default: http://localhost:3001/api/v1)
+- `VITE_SERVER_URL` - WebSocket server URL (default: http://localhost:3001)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Create a `.env` file in the client directory:
+
+```env
+VITE_API_URL=http://localhost:3001/api/v1
+VITE_SERVER_URL=http://localhost:3001
+```
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Testing
+
+```bash
+# Run unit tests
+npm run test
+
+# Run E2E tests
+npm run test:e2e
+
+# Run all tests
+npm run test:all
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+## Building the Chat Widget
+
+The chat widget can be built separately for embedding:
+
+```bash
+npm run build:widget
+```
+
+## Tech Stack
+
+- React 19 with Vite
+- Tailwind CSS for styling
+- React Router for navigation
+- Socket.io for real-time communication
+- Recharts for analytics visualization
+- Jest and Playwright for testing

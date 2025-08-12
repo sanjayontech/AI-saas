@@ -27,4 +27,5 @@ const LoadingPage = ({ message = 'Loading...' }) => (
 
 LoadingSpinner.Page = LoadingPage;
 
+export { LoadingSpinner };
 export default LoadingSpinner;

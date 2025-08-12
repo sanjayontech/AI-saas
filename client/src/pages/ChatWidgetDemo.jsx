@@ -27,7 +27,7 @@ const ChatWidgetDemo = () => {
     script.src = '${window.location.origin}/widget/chat-widget.iife.js';
     script.setAttribute('data-chatbot-id', '${widgetConfig.chatbotId}');
     script.setAttribute('data-position', '${widgetConfig.position}');
-    script.setAttribute('data-server-url', '${process.env.REACT_APP_SERVER_URL || 'http://localhost:3000'}');
+    script.setAttribute('data-server-url', '${import.meta.env.VITE_SERVER_URL || 'http://localhost:3001'}');
     script.setAttribute('data-primary-color', '${widgetConfig.theme.primaryColor}');
     script.setAttribute('data-secondary-color', '${widgetConfig.theme.secondaryColor}');
     script.setAttribute('data-text-color', '${widgetConfig.theme.textColor}');

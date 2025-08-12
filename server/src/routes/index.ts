@@ -5,19 +5,14 @@ import adminRoutes from './admin';
 import chatbotRoutes from './chatbots';
 import widgetRoutes from './widget';
 import analyticsRoutes from './analytics';
+// import healthRoutes from './health';
+// import metricsRoutes from './metrics';
 
 const router = Router();
 
-// Health check endpoint
-router.get('/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'API is healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
+// Health check routes (available without /api/v1 prefix for load balancers)
+// router.use('/health', healthRoutes);
+// router.use('/metrics', metricsRoutes);
 
 // API routes
 router.use('/auth', authRoutes);

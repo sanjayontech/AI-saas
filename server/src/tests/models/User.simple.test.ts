@@ -1,7 +1,7 @@
 import { User } from '../../models/User';
-import { TestCleanup } from '../utils/testHelpers';
+import { TestCleanup, TestAssertions } from '../utils/testHelpers';
 
-describe('User Model - Simple Tests', () => {
+describe('User Model - Unit Tests', () => {
   afterEach(async () => {
     await TestCleanup.cleanupAll();
   });

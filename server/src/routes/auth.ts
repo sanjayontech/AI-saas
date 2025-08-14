@@ -45,6 +45,7 @@ router.post('/resend-verification', authLimiter, AuthController.resendEmailVerif
 
 // Protected routes
 router.get('/me', authenticate, AuthController.getCurrentUser);
+router.post('/refresh-user-token', authenticate, AuthController.refreshUserToken);
 router.post('/logout', authenticate, AuthController.logout);
 
 // Routes that require email verification

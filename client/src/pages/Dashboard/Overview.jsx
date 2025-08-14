@@ -24,6 +24,40 @@ const Overview = () => {
 
       if (data.success) {
         setStats(data.data.usage);
+      } else if (response.status === 403) {
+        // Try refreshing the token in case email was recently verified
+        try {
+          const refreshResponse = await fetch('http://localhost:3001/api/v1/auth/refresh-user-token', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json();
+            // Update stored token and user data
+            localStorage.setItem('token', refreshData.data.tokens.accessToken);
+            localStorage.setItem('user', JSON.stringify(refreshData.data.user));
+            
+            // Retry the original request
+            const retryResponse = await fetch('http://localhost:3001/api/v1/users/profile', {
+              headers: {
+                'Authorization': `Bearer ${refreshData.data.tokens.accessToken}`,
+              },
+            });
+
+            const retryData = await retryResponse.json();
+            if (retryData.success) {
+              setStats(retryData.data.usage);
+              return;
+            }
+          }
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+        }
+        
+        setError('Email verification required. Please check your email and verify your account.');
       } else {
         setError('Failed to load dashboard data');
       }
@@ -43,12 +77,31 @@ const Overview = () => {
     return (
       <div className="text-center py-12">
         <p className="text-red-600">{error}</p>
-        <button 
-          onClick={fetchDashboardStats}
-          className="mt-4 text-indigo-600 hover:text-indigo-500"
-        >
-          Try again
-        </button>
+        {error.includes('Email verification') && (
+          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-sm text-yellow-800">
+              If you've already verified your email, try refreshing your session by clicking "Try again" below.
+            </p>
+          </div>
+        )}
+        <div className="space-x-4 mt-4">
+          <button 
+            onClick={fetchDashboardStats}
+            className="text-indigo-600 hover:text-indigo-500"
+          >
+            Try again
+          </button>
+          <button 
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              window.location.href = '/auth';
+            }}
+            className="text-red-600 hover:text-red-500"
+          >
+            Log out and try again
+          </button>
+        </div>
       </div>
     );
   }

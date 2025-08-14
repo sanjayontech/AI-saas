@@ -73,11 +73,12 @@ export const requireEmailVerification = (
   res: Response,
   next: NextFunction
 ): void => {
+  // Check the user from database (req.user is fetched fresh from DB in authenticate middleware)
   if (!req.user?.emailVerified) {
     res.status(403).json({
       error: {
         code: 403,
-        message: 'Email verification required',
+        message: 'Email verification required. Please check your email and verify your account, then log out and log back in.',
         timestamp: new Date().toISOString()
       }
     });

@@ -65,7 +65,7 @@ router.get('/', async (req: Request, res: Response) => {
       healthStatus.services.database = {
         status: 'disconnected',
         error: error instanceof Error ? error.message : 'Unknown database error'
-      };
+      } as any;
       healthStatus.status = 'unhealthy';
     }
 
@@ -81,7 +81,7 @@ router.get('/', async (req: Request, res: Response) => {
       healthStatus.services.redis = {
         status: 'disconnected',
         error: error instanceof Error ? error.message : 'Unknown Redis error'
-      };
+      } as any;
       healthStatus.status = 'unhealthy';
     }
 
@@ -169,12 +169,12 @@ router.get('/detailed', async (req: Request, res: Response) => {
         activeConnections: dbStats.rows[0]?.active_connections || 0,
         databaseSize: dbStats.rows[0]?.database_size || 'unknown',
         version: dbStats.rows[0]?.version || 'unknown'
-      };
+      } as any;
     } catch (error) {
       healthStatus.services.database = {
         status: 'disconnected',
         error: error instanceof Error ? error.message : 'Unknown database error'
-      };
+      } as any;
       healthStatus.status = 'unhealthy';
     }
 
@@ -195,12 +195,12 @@ router.get('/detailed', async (req: Request, res: Response) => {
         responseTime: Date.now() - redisStartTime,
         memoryUsage: memoryMatch ? memoryMatch[1] : 'unknown',
         connectedClients: connectionsMatch ? parseInt(connectionsMatch[1]) : 0
-      };
+      } as any;
     } catch (error) {
       healthStatus.services.redis = {
         status: 'disconnected',
         error: error instanceof Error ? error.message : 'Unknown Redis error'
-      };
+      } as any;
       healthStatus.status = 'unhealthy';
     }
 

@@ -99,6 +99,22 @@ router.get(
   ChatbotController.getConversationHistory
 );
 
+router.get(
+  '/:chatbotId/embed',
+  authenticate,
+  requireEmailVerification,
+  chatbotManagementLimiter,
+  ChatbotController.getEmbedCode
+);
+
+router.post(
+  '/:chatbotId/test',
+  authenticate,
+  requireEmailVerification,
+  chatbotManagementLimiter,
+  ChatbotController.testChatbot
+);
+
 router.post(
   '/:chatbotId/train',
   authenticate,

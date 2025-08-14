@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { chatbotAPI } from '../utils/api';
 import { useAuth } from './AuthContext';
 
@@ -14,29 +14,37 @@ export const useChatbot = () => {
 
 export const ChatbotProvider = ({ children }) => {
   const [chatbots, setChatbots] = useState([]);
+  const [selectedChatbot, setSelectedChatbot] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { isAuthenticated } = useAuth();
+
+  const loadChatbots = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await chatbotAPI.getAll();
+      const chatbotData = response.data?.chatbots || [];
+      setChatbots(chatbotData);
+      
+      // Auto-select first chatbot if none selected
+      if (chatbotData.length > 0 && !selectedChatbot) {
+        setSelectedChatbot(chatbotData[0]);
+      }
+    } catch (err) {
+      setError(err.message);
+      setChatbots([]); // Ensure chatbots is always an array
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedChatbot]);
 
   // Load chatbots when authenticated
   useEffect(() => {
     if (isAuthenticated()) {
       loadChatbots();
     }
-  }, [isAuthenticated]);
-
-  const loadChatbots = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await chatbotAPI.getAll();
-      setChatbots(response.data || []);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [isAuthenticated, loadChatbots]);
 
   const createChatbot = async (chatbotData) => {
     try {
@@ -116,6 +124,8 @@ export const ChatbotProvider = ({ children }) => {
 
   const value = {
     chatbots,
+    selectedChatbot,
+    setSelectedChatbot,
     loading,
     error,
     loadChatbots,

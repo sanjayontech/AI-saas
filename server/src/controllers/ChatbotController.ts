@@ -26,7 +26,7 @@ export class ChatbotController {
           fontFamily: Joi.string().default('Inter, sans-serif'),
           borderRadius: Joi.number().min(0).max(50).default(8),
           position: Joi.string().valid('bottom-right', 'bottom-left', 'center').default('bottom-right'),
-          avatar: Joi.string().optional()
+          avatar: Joi.string().allow('').optional()
         }).default(),
         settings: Joi.object({
           maxTokens: Joi.number().min(100).max(4000).default(1000),
@@ -120,7 +120,7 @@ export class ChatbotController {
           fontFamily: Joi.string(),
           borderRadius: Joi.number().min(0).max(50),
           position: Joi.string().valid('bottom-right', 'bottom-left', 'center'),
-          avatar: Joi.string().optional()
+          avatar: Joi.string().allow('').optional()
         }).optional(),
         settings: Joi.object({
           maxTokens: Joi.number().min(100).max(4000),
@@ -166,6 +166,107 @@ export class ChatbotController {
       res.status(200).json({
         success: true,
         message: 'Chatbot deleted successfully'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Generate embed code for a chatbot
+   */
+  static async getEmbedCode(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as any).user.id;
+      const { chatbotId } = req.params;
+
+      // Verify the chatbot belongs to the user
+      const chatbot = await ChatbotController.chatbotService.getChatbotById(chatbotId, userId);
+
+      if (!chatbot) {
+        res.status(404).json({
+          error: {
+            code: 404,
+            message: 'Chatbot not found',
+            timestamp: new Date().toISOString()
+          }
+        });
+        return;
+      }
+
+      // Generate the embed code
+      const embedCode = `<script>
+  (function() {
+    var chatbotScript = document.createElement('script');
+    chatbotScript.src = '${process.env.CLIENT_URL || 'http://localhost:3000'}/widget.js';
+    chatbotScript.setAttribute('data-chatbot-id', '${chatbotId}');
+    chatbotScript.setAttribute('data-api-url', '${process.env.API_URL || 'http://localhost:3001/api/v1'}');
+    document.head.appendChild(chatbotScript);
+  })();
+</script>`;
+
+      res.status(200).json({
+        success: true,
+        data: {
+          embedCode,
+          chatbotId,
+          instructions: 'Copy and paste this code into your website\'s HTML, preferably before the closing </body> tag.'
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Test a chatbot with a message
+   */
+  static async testChatbot(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as any).user.id;
+      const { chatbotId } = req.params;
+      const { message, context = {} } = req.body;
+
+      if (!message || typeof message !== 'string') {
+        res.status(400).json({
+          error: {
+            code: 400,
+            message: 'Message is required and must be a string',
+            timestamp: new Date().toISOString()
+          }
+        });
+        return;
+      }
+
+      // Verify the chatbot belongs to the user
+      const chatbot = await ChatbotController.chatbotService.getChatbotById(chatbotId, userId);
+
+      if (!chatbot) {
+        res.status(404).json({
+          error: {
+            code: 404,
+            message: 'Chatbot not found',
+            timestamp: new Date().toISOString()
+          }
+        });
+        return;
+      }
+
+      // Process the test message
+      const response = await ChatbotController.chatbotService.processMessage({
+        chatbotId,
+        sessionId: `test-${Date.now()}`, // Generate a test session ID
+        message,
+        userInfo: context
+      });
+
+      res.status(200).json({
+        success: true,
+        data: {
+          response: response.response,
+          conversationId: response.conversationId,
+          metadata: response.metadata || {}
+        }
       });
     } catch (error) {
       next(error);

@@ -119,6 +119,14 @@ export const analyticsAPI = {
   }
 };
 
+// Authentication API functions
+export const authAPI = {
+  // Refresh user token with updated data (useful after email verification)
+  refreshToken: () => apiRequest('/auth/refresh-user-token', {
+    method: 'POST',
+  }),
+};
+
 // User Management API functions
 export const userAPI = {
   // Get complete user profile including preferences and usage stats

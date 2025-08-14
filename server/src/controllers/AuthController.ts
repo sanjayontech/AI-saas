@@ -6,6 +6,7 @@ import {
   ConflictError, 
   NotFoundError 
 } from '../utils/errors';
+import { User } from '../models/User';
 
 export class AuthController {
   static async register(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -103,6 +104,46 @@ export class AuthController {
             emailVerified: user.emailVerified,
             createdAt: user.createdAt
           }
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async refreshUserToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as any).user.id;
+
+      // Get fresh user data from database
+      const user = await User.findById(userId);
+      if (!user) {
+        res.status(404).json({
+          error: {
+            code: 404,
+            message: 'User not found',
+            timestamp: new Date().toISOString()
+          }
+        });
+        return;
+      }
+
+      // Generate new tokens with updated user data
+      const tokens = user.generateTokens();
+
+      res.status(200).json({
+        success: true,
+        message: 'Token refreshed successfully',
+        data: {
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            emailVerified: user.emailVerified,
+            createdAt: user.createdAt
+          },
+          tokens
         }
       });
     } catch (error) {

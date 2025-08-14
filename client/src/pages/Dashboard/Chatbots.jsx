@@ -39,7 +39,7 @@ const Chatbots = () => {
   };
 
   // Filter and search chatbots
-  const filteredChatbots = chatbots.filter(chatbot => {
+  const filteredChatbots = (chatbots || []).filter(chatbot => {
     const matchesSearch = chatbot.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          chatbot.description.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -50,7 +50,7 @@ const Chatbots = () => {
     return matchesSearch && matchesFilter;
   });
 
-  if (loading && chatbots.length === 0) {
+  if (loading && (!chatbots || chatbots.length === 0)) {
     return (
       <div className="flex items-center justify-center h-64">
         <LoadingSpinner />
@@ -89,7 +89,7 @@ const Chatbots = () => {
         </Card>
       )}
 
-      {chatbots.length > 0 ? (
+      {(chatbots && chatbots.length > 0) ? (
         <>
           {/* Filters and Search */}
           <Card>
@@ -180,18 +180,18 @@ const Chatbots = () => {
           <Card>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{chatbots.length}</div>
+                <div className="text-2xl font-bold text-gray-900">{(chatbots || []).length}</div>
                 <div className="text-sm text-gray-500">Total Chatbots</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
-                  {chatbots.filter(bot => bot.isActive).length}
+                  {(chatbots || []).filter(bot => bot.isActive).length}
                 </div>
                 <div className="text-sm text-gray-500">Active</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-400">
-                  {chatbots.filter(bot => !bot.isActive).length}
+                  {(chatbots || []).filter(bot => !bot.isActive).length}
                 </div>
                 <div className="text-sm text-gray-500">Inactive</div>
               </div>

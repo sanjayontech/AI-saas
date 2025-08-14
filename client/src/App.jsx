@@ -1,6 +1,7 @@
 import React from 'react'
 import { Route, Routes, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { ChatbotProvider } from './contexts/ChatbotContext'
 import Auth from './pages/Auth'
 import ChatWidgetDemo from './pages/ChatWidgetDemo'
 import DashboardLayout from './components/Layout/DashboardLayout'
@@ -15,8 +16,9 @@ const App = () => {
 
   return (
     <AuthProvider>
-      <div>
-        <Routes>
+      <ChatbotProvider>
+        <div>
+          <Routes>
           <Route path='/auth' element={<Auth />} />
           <Route path='/widget-demo' element={<ChatWidgetDemo />} />
           
@@ -67,8 +69,9 @@ const App = () => {
             path='/' 
             element={<Navigate to="/dashboard" />} 
           />
-        </Routes>
-      </div>
+          </Routes>
+        </div>
+      </ChatbotProvider>
     </AuthProvider>
   )
 }

@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { monitoringService } from '../middleware/monitoring';
 import { redisClient } from '../config/redis';
-import { knex } from '../database/connection';
+import knex from '../database/connection';
 
 const router = Router();
 
